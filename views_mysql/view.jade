@@ -19,5 +19,11 @@ html
                 h2 Welcome
                 | Server Side JS tutorial
                 
-        div 
-            a(href="/topic/add") add
+        ul 
+            li
+                a(href="/topic/add") add
+            if topic
+                li 
+                    a(href="/topic/"+topic.id+"/edit") edit
+                li 
+                    a(href="/topic/"+topic.id+"/delete") delete

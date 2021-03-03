@@ -47,6 +47,77 @@ app.post('/topic/add', (req, res) => { //topic으로 전송한 데이터 캐치
     });
 });
 
+app.get(['/topic/:id/edit'], (req, res) => {
+    const sql = 'SELECT id, title, description FROM topic';
+    conn.query(sql, (err, topics, fields) => {
+        const id = req.params.id;
+        if (id) {
+            const inner_sql = 'SELECT * FROM topic WHERE id=?';
+            conn.query(inner_sql, [id], (err, topic, fields) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send('Internal Server Error');
+                } else {
+                    res.render('edit', { topics, topic: topic[0] });
+                }
+            });
+        } else {
+            console.log("No id in editing");
+            res.status(500).send('Internal Server Error');
+        }
+    });
+});
+
+app.post(['/topic/:id/edit'], (req, res) => {
+    const title = req.body.title;
+    const description = req.body.description;
+    const author = req.body.author;
+    const id = req.params.id;
+    const sql = 'UPDATE topic SET title=?, description=?, author=? WHERE id=?';
+    conn.query(sql, [title, description, author, id], (err, results, fields) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.redirect("/topic/" + id);
+        }
+    });
+});
+
+app.get('/topic/:id/delete', (req, res) => {
+    const sql = 'SELECT id, title, description FROM topic';
+    const id = req.params.id;
+    conn.query(sql, (err, topics, fields) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            const sql = 'SELECT * FROM topic WHERE id=?'
+            conn.query(sql, [id], (err, topic) => {
+                if (err) {
+                    console.log(err);
+                    res.status(500).send('Internal Server Error');
+                } else {
+                    if (topic.length === 0) {
+                        console.log("no record to delete");
+                        res.status(500).send('Internal Server Error');
+                    } else {
+                        res.render('delete', { topics, topic: topic[0] })
+                    }
+                }
+            });
+        }
+    });
+});
+
+app.post('/topic/:id/delete', (req, res) => {
+    const id = req.params.id;
+    const sql = 'DELETE FROM topic WHERE id=?'
+    conn.query(sql, [id], (err, result) => {
+        res.redirect('/topic');
+    });
+});
+
 
 app.get(['/topic', '/topic/:id'], (req, res) => {
     const sql = 'SELECT id, title, description FROM topic';
